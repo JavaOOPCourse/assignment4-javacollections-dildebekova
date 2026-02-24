@@ -1,11 +1,118 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" inherit-compiler-output="true">
-    <exclude-output />
-    <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-    </content>
-    <orderEntry type="inheritedJdk" />
-    <orderEntry type="sourceFolder" forTests="false" />
-  </component>
-</module>
+import java.util.Scanner;
+
+public class SmartUniversitySystem {
+    
+    private static StudentDatabase studentDB = new StudentDatabase();
+    private static AppointmentQueue appointments = new AppointmentQueue();
+    private static EmergencyIssues issues = new EmergencyIssues();
+    private static ActionHistory history = new ActionHistory();
+    private static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        // 🚀 Инициализация данных
+        studentDB.addStudents();
+        studentDB.removeLowGPA();
+        studentDB.insertAtIndex2();
+        
+        appointments.addNormalAppointments();
+        appointments.addUrgentAtBeginning();
+        appointments.cancelLast();
+        
+        issues.addIssues();
+        
+        history.addInitialActions();
+        history.undoLastAction();
+        history.addNewAction("Requested Transcript");
+
+        // 🎛️ Меню
+        boolean running = true;
+        while (running) {
+            showMenu();
+            int choice = getChoice();
+            
+            switch (choice) {
+                case 1 -> showStudents();
+                case 2 -> showAppointments();
+                case 3 -> showEmergencyIssues();
+                case 4 -> showActionHistory();
+                case 5 -> addNewIssue();
+                case 6 -> undoAction();
+                case 7 -> {
+                    System.out.println("👋 До свидания! Удачи в учёбе!");
+                    running = false;
+                }
+                default -> System.out.println("❌ Неверный выбор. Попробуйте снова.");
+            }
+            System.out.println("\n" + "=".repeat(50) + "\n");
+        }
+    }
+
+    private static void showMenu() {
+        System.out.println("🎓 SMART UNIVERSITY SERVICE SYSTEM");
+        System.out.println("1. Показать студентов");
+        System.out.println("2. Показать записи");
+        System.out.println("3. Показать срочные проблемы");
+        System.out.println("4. Показать историю действий");
+        System.out.println("5. Добавить новую проблему");
+        System.out.println("6. Отменить действие");
+        System.out.println("7. Выход");
+        System.out.print("\nВыберите опцию (1-7): ");
+    }
+
+    private static int getChoice() {
+        try {
+            return Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    private static void showStudents() {
+        System.out.println("\n👥 Студенты с высоким GPA:");
+        studentDB.printAllWithIterator();
+        Student top = studentDB.findTopStudent();
+        if (top != null) {
+            System.out.println("\n🏆 Лучший студент: " + top);
+        }
+    }
+
+    private static void showAppointments() {
+        System.out.println("\n📅 Записи на консультации:");
+        appointments.showFirstAndLast();
+        appointments.printWithIterator();
+    }
+
+    private static void showEmergencyIssues() {
+        System.out.println("\n🚨 Срочные проблемы:");
+        issues.showMostUrgent();
+        issues.printInPriorityOrder();
+    }
+
+    private static void showActionHistory() {
+        System.out.println("\n🔄 История действий:");
+        history.showFirstAndLast();
+        history.printHistoryWithIterator();
+    }
+
+    private static void addNewIssue() {
+        System.out.print("\nВведите описание проблемы: ");
+        String desc = scanner.nextLine();
+        System.out.print("Уровень срочности (1-5, где 1 = самый срочный): ");
+        try {
+            int level = Integer.parseInt(scanner.nextLine());
+            if (level >= 1 && level <= 5) {
+                issues.getIssues().add(new Issue(desc, level));
+                System.out.println("✅ Проблема добавлена!");
+            } else {
+                System.out.println("❌ Уровень должен быть от 1 до 5");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("❌ Введите число!");
+        }
+    }
+
+    private static void undoAction() {
+        System.out.println("\n↩️ Отмена последнего действия...");
+        history.undoLastAction();
+    }
+}
